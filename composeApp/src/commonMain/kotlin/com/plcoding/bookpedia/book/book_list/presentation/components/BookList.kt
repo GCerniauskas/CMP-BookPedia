@@ -1,4 +1,4 @@
-package com.plcoding.bookpedia.feature.book.presentation.components
+package com.plcoding.bookpedia.book.book_list.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.plcoding.bookpedia.feature.book.domain.Book
+import com.plcoding.bookpedia.book.book_list.domain.Book
 
 @Composable
 fun BookList(

@@ -1,8 +1,9 @@
-package com.plcoding.bookpedia.feature.book.presentation.components
+package com.plcoding.bookpedia.book.book_list.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -37,7 +38,7 @@ import cmp_bookpedia.composeapp.generated.resources.book_error_2
 import coil3.compose.rememberAsyncImagePainter
 import com.plcoding.bookpedia.core.presentation.LightBlue
 import com.plcoding.bookpedia.core.presentation.SandYellow
-import com.plcoding.bookpedia.feature.book.domain.Book
+import com.plcoding.bookpedia.book.book_list.domain.Book
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.round
 
@@ -49,7 +50,7 @@ fun BookListItem(
 ) {
     Surface(
         shape = RoundedCornerShape(32.dp),
-        modifier = Modifier
+        modifier = modifier
             .clickable(onClick = onClick),
         color = LightBlue.copy(alpha = 0.2f)
     ) {
@@ -57,48 +58,57 @@ fun BookListItem(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min) // Importante para definir altura mínima com base nos conteúdos dentro
+                .height(IntrinsicSize.Min), // Importante para definir altura mínima com base nos conteúdos dentro
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            var imageLoadResult by remember {
-                mutableStateOf<Result<Painter>?>(null)
-            }
-            val painter = rememberAsyncImagePainter(
-                model = book.imageUrl,
-                onSuccess = {
-                    if (it.painter.intrinsicSize.width > 1 && it.painter.intrinsicSize.height > 1) {
-                        Result.success(it.painter)
-                    } else {
-                        Result.failure(Exception("Failed to load image"))
-                    }
-                },
-                onError = {
-                    it.result.throwable.printStackTrace()
-                    imageLoadResult = Result.failure(it.result.throwable)
-                }
-            )
 
-            when (val result = imageLoadResult) {
-                null -> CircularProgressIndicator()
-                else -> {
-                    Image(
-                        painter = if (result.isSuccess) painter else {
-                            painterResource(Res.drawable.book_error_2)
-                        },
-                        contentDescription = book.title,
-                        contentScale = if (result.isSuccess) {
-                            ContentScale.Crop
+            Box(
+                modifier = Modifier
+                    .height(100.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                var imageLoadResult by remember {
+                    mutableStateOf<Result<Painter>?>(null)
+                }
+                val painter = rememberAsyncImagePainter(
+                    model = book.imageUrl,
+                    onSuccess = {
+                        imageLoadResult =
+                        if (it.painter.intrinsicSize.width > 1 && it.painter.intrinsicSize.height > 1) {
+                            Result.success(it.painter)
                         } else {
-                            ContentScale.Fit
-                        },
-                        modifier = Modifier
-                            .aspectRatio(
-                                ratio = 0.65f,
-                                matchHeightConstraintsFirst = true
-                            )
-                    )
+                            Result.failure(Exception("Failed to load image"))
+                        }
+                    },
+                    onError = {
+                        it.result.throwable.printStackTrace()
+                        imageLoadResult = Result.failure(it.result.throwable)
+                    }
+                )
+
+                when (val result = imageLoadResult) {
+                    null -> CircularProgressIndicator()
+                    else -> {
+                        Image(
+                            painter = if (result.isSuccess) painter else {
+                                painterResource(Res.drawable.book_error_2)
+                            },
+                            contentDescription = book.title,
+                            contentScale = if (result.isSuccess) {
+                                ContentScale.Crop
+                            } else {
+                                ContentScale.Fit
+                            },
+                            modifier = Modifier
+                                .aspectRatio(
+                                    ratio = 0.65f,
+                                    matchHeightConstraintsFirst = true
+                                )
+                        )
+                    }
                 }
             }
-
             Column(
                 modifier = Modifier
                     .fillMaxHeight()

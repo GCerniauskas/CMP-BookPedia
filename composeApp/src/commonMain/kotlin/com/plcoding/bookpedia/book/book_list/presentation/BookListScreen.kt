@@ -1,4 +1,4 @@
-package com.plcoding.bookpedia.feature.book.presentation
+package com.plcoding.bookpedia.book.book_list.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +23,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,13 +34,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cmp_bookpedia.composeapp.generated.resources.Res
 import cmp_bookpedia.composeapp.generated.resources.favorites
+import cmp_bookpedia.composeapp.generated.resources.no_favorite_book
 import cmp_bookpedia.composeapp.generated.resources.no_search_results
 import cmp_bookpedia.composeapp.generated.resources.search_results
 import com.plcoding.bookpedia.core.presentation.DarkBlue
 import com.plcoding.bookpedia.core.presentation.DesertWhite
 import com.plcoding.bookpedia.core.presentation.SandYellow
-import com.plcoding.bookpedia.feature.book.domain.Book
-import com.plcoding.bookpedia.feature.book.presentation.components.BookSearchBar
+import com.plcoding.bookpedia.book.book_list.domain.Book
+import com.plcoding.bookpedia.book.book_list.presentation.components.BookList
+import com.plcoding.bookpedia.book.book_list.presentation.components.BookListSearchBar
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -68,6 +72,20 @@ fun BookListScreen(
 ) {
     val keyboardComposable = LocalSoftwareKeyboardController.current
     val pagerState = rememberPagerState { 2 }
+    val searchResultsLazyState = rememberLazyListState()
+    val favoritesLazyState = rememberLazyListState()
+
+    LaunchedEffect(state.searchResults) {
+        searchResultsLazyState.animateScrollToItem(0)
+    }
+
+    LaunchedEffect(state.selectedIndex) {
+        pagerState.animateScrollToPage(state.selectedIndex)
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+            onAction(BookListAction.OnTabSelected(pagerState.currentPage))
+    }
 
     Column(
         modifier = Modifier
@@ -76,7 +94,7 @@ fun BookListScreen(
             .statusBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        BookSearchBar(
+        BookListSearchBar(
             searchQuery = state.searchQuery,
             onSearchQueryChange = {
                 onAction(BookListAction.OnSearchQueryChange(it))
@@ -107,7 +125,7 @@ fun BookListScreen(
                     modifier = Modifier
                         .padding(vertical = 12.dp)
                         .widthIn(max = 700.dp)
-                        .fillMaxWidth( ),
+                        .fillMaxWidth(),
                     indicator = { tabPositions -> // Mudar a cor do indicador.
                         TabRowDefaults.SecondaryIndicator(
                             color = SandYellow,
@@ -183,11 +201,36 @@ fun BookListScreen(
                                                 color = MaterialTheme.colorScheme.error
                                             )
                                         }
+                                        else -> {
+                                            BookList(
+                                                books = state.searchResults,
+                                                onBookClick = { book ->
+                                                    onAction(BookListAction.OnBookClick(book))
+                                                },
+                                                modifier = Modifier.fillMaxSize(),
+                                                scrollState = searchResultsLazyState
+                                            )
+                                        }
                                     }
                                 }
                             }
                             1 -> {
-
+                                if (state.favoriteBooks.isEmpty()) {
+                                    Text(
+                                        text = stringResource(Res.string.no_favorite_book),
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.headlineSmall
+                                    )
+                                } else {
+                                    BookList(
+                                        books = state.favoriteBooks,
+                                        onBookClick = { book ->
+                                            onAction(BookListAction.OnBookClick(book))
+                                        },
+                                        modifier = Modifier.fillMaxSize(),
+                                        scrollState = favoritesLazyState
+                                    )
+                                }
                             }
                         }
                     }

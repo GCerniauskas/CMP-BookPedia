@@ -7,11 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.plcoding.bookpedia.feature.book.domain.Book
-import com.plcoding.bookpedia.feature.book.presentation.BookListScreen
-import com.plcoding.bookpedia.feature.book.presentation.BookListScreenRoot
-import com.plcoding.bookpedia.feature.book.presentation.BookListState
-import com.plcoding.bookpedia.feature.book.presentation.components.BookSearchBar
+import com.plcoding.bookpedia.book.book_list.domain.Book
+import com.plcoding.bookpedia.book.book_list.presentation.BookListScreen
+import com.plcoding.bookpedia.book.book_list.presentation.BookListState
+import com.plcoding.bookpedia.book.book_list.presentation.components.BookListSearchBar
 
 @Preview
 @Composable
@@ -21,7 +20,7 @@ private fun BookSearchBarPreview() {
             .fillMaxWidth()
             .background(Color.White)
     ) {
-        BookSearchBar(
+        BookListSearchBar(
             searchQuery = "",
             onSearchQueryChange = {},
             onImeSearch = {},
@@ -29,6 +28,18 @@ private fun BookSearchBarPreview() {
                 .fillMaxWidth()
         )
     }
+}
+
+@Preview
+@Composable
+private fun BookListScreenPreview() {
+    BookListScreen(
+        state = BookListState(
+            searchResults = books
+        ),
+        onAction = {}
+    )
+    
 }
 
 private val books = (1..100).map {
@@ -45,16 +56,4 @@ private val books = (1..100).map {
         numPages = null,
         numEditions = 3,
     )
-}
-
-@Preview
-@Composable
-private fun BookListScreenPreview() {
-    BookListScreen(
-        state = BookListState(
-            searchResults = books
-        ),
-        onAction = {}
-    )
-    
 }
